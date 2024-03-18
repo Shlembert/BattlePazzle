@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    [SerializeField] private Text resultText, scoreText, timeText, totalScoreText;
+    [SerializeField] private Text resultText, scoreText, timeText, totalScoreText, bonusText;
     [SerializeField] private GridGenerator gridGenerator;
     [SerializeField] private GridPlacement left, right;
     [SerializeField] private RectTransform leftOffsetSceen, rightOffsetScreen;
@@ -17,9 +17,15 @@ public class GameController : MonoBehaviour
     [SerializeField] private Image screen;
     [SerializeField] private float alfaPicture;
     [SerializeField] private int niceScore, goodScore, nobadScore;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip niceClip, goodClip, nobadClip;
 
     private Vector3 _textPos;
     private Color _textColor;
+    private Color _bonusColor;
+
+    private AudioClip _currentClip;
+
     private int _score = 0;
     private int _count;
     private int _totalScore = 0;
@@ -36,6 +42,7 @@ public class GameController : MonoBehaviour
 
         _textPos = resultText.transform.position;
         _textColor = resultText.color;
+        _bonusColor = bonusText.color;
 
         if (!_check) _check = true;
         else return;
@@ -114,7 +121,7 @@ public class GameController : MonoBehaviour
                 }
             }
 
-          await  ReadySend();
+            await ReadySend();
         }
     }
 
@@ -150,10 +157,10 @@ public class GameController : MonoBehaviour
         string formattedTime = string.Format("{0:00}:{1:00}:{2:00}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
 
         Debug.Log(
-            "score: " + _score + 
-            " || Time: " + formattedTime + 
-            " || timeRatio: " + timeRatio + 
-            " || winCount: " + _winCount + 
+            "score: " + _score +
+            " || Time: " + formattedTime +
+            " || timeRatio: " + timeRatio +
+            " || winCount: " + _winCount +
             " || Total: " + _totalScore);
 
         winPanel.gameObject.SetActive(true);
@@ -167,39 +174,62 @@ public class GameController : MonoBehaviour
     private void CheckDistance(float distance)
     {
         string result;
-       
+        string bonus;
+
         if (distance < 0.1)
         {
             result = "Nice!";
+            bonus = niceScore.ToString();
             _score += niceScore;
+            _currentClip = niceClip;
+
         }
         else if (distance < 0.5)
         {
             result = "Good!";
+            bonus = goodScore.ToString();
             _score += goodScore;
+            _currentClip = goodClip;
         }
         else
         {
             result = "No bad";
+            bonus = nobadScore.ToString();
             _score += nobadScore;
+            _currentClip = nobadClip;
         }
 
         scoreText.text = "Score: " + _score.ToString();
+        bonusText.text = "+" + bonus;
         resultText.text = result;
+        bonusText.DOKill();
         resultText.DOKill();
+        bonusText.transform.position = _textPos;
         resultText.transform.position = _textPos;
         resultText.color = _textColor;
-
+        bonusText.color = _bonusColor;
         resultText.DOFade(1f, 0.1f);
         // Создаем последовательность анимаций
         Sequence sequence = DOTween.Sequence();
 
         // Анимация 1: текст становится видимым и увеличивается в размере
         sequence.Append(resultText.DOFade(0f, 0.5f).From()); // Плавное появление текста
-        sequence.Join(resultText.transform.DOScale(Vector3.zero, 0.5f).From()); // Увеличение размера текста
+
+        // Лютая дичь каскадом, что бы добавить анимацию балла                                                   
+        sequence.Append(bonusText.DOFade(0f, 0.3f).From().OnComplete(() =>
+        {
+            audioSource.PlayOneShot(_currentClip);
+
+            bonusText.transform.DOMoveY(15f, 1.2f).SetEase(Ease.InBack).OnComplete(() =>
+            {
+                bonusText.DOFade(0f, 1f);
+            });
+        }));
+
+        sequence.Join(resultText.transform.DOScale(Vector3.zero, 0.3f).From()); // Увеличение размера текста
 
         // Анимация 2: текст поднимается наверх и становится прозрачным
-        sequence.Append(resultText.transform.DOMoveY(15f, 0.8f).SetEase(Ease.InBack)); // Поднятие текста
+        sequence.Append(resultText.transform.DOMoveY(19f, 0.8f).SetEase(Ease.InBack)); // Поднятие текста
         sequence.Join(resultText.DOFade(0f, 1f)); // Исчезновение текста
 
         // Запускаем последовательность анимаций
@@ -220,7 +250,7 @@ public class GameController : MonoBehaviour
         while (!stop)
         {
             yield return new WaitForSeconds(1);
-            _currentTime ++;
+            _currentTime++;
 
             TimeSpan timeSpan = TimeSpan.FromSeconds(Mathf.CeilToInt(_currentTime));
             string formattedTime = string.Format("{0:00}:{1:00}:{2:00}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);

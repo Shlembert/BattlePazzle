@@ -1,8 +1,8 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Plugins.Scripts.Dropbox;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -16,29 +16,50 @@ public class ImageDownloader : MonoBehaviour
     [SerializeField] private GameObject downloadScreen;
     [SerializeField] private Image fill;
 
+    private DataManager _dataManager;
+    private AlbumChanger _albumChanger;
+
     private int _nextImageIndex = 1;
     private string _currentURL;
-    private string _spaceAlbum = "Space/";
-    //private string _superAlbum = "Super/";
-    //private string _forestAlbum = "Forest/";
-    //private string _fantasyAlbum = "Space/";
+    private string _loadURL;
 
-    private void Awake()
-    {
-        _currentURL = serverURL + _spaceAlbum;
-    }
-
+    [Obsolete]
     private async void Start()
     {
         await DropboxHelper.Initialize();
-        
+        await LoadAlbum();
+
         CreateEmptyPrefabs();
         StartCoroutine(AnimateDownloadScreen());
     }
 
+    [Obsolete]
+    private async UniTask LoadAlbum()
+    {
+        _albumChanger = GetComponent<AlbumChanger>();
+        _dataManager = GetComponent<DataManager>();
+
+        _loadURL = await _dataManager.LoadUserDataAsync(); // Дожидаемся завершения LoadUserDataAsync
+        if (_loadURL == "") _loadURL = "Space/";
+
+        _currentURL = serverURL + _loadURL;
+        _albumChanger.ButtonState(ButtonStateName());
+    }
+
+    private string ButtonStateName()
+    {
+        string buttonName = "Button" + _loadURL.Substring(0, _loadURL.Length - 1);
+        return buttonName;
+    }
+
     public void ChangeAlbum(string album)
     {
-        _currentURL = serverURL +  album;
+        _currentURL = serverURL + album;
+
+        Debug.Log(_currentURL);
+
+        _dataManager.SaveUserData(album);
+
         _nextImageIndex = 1;
         DOTween.KillAll();
 

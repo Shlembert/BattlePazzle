@@ -104,8 +104,6 @@ namespace Plugins.Scripts.Dropbox
 
             var data = JObject.Parse(request.downloadHandler.text);
             _tempRuntimeToken = data["access_token"]?.Value<string>();
-
-            Debug.Log("Token: " + _tempRuntimeToken);
         }
 
         /// <summary>
