@@ -6,6 +6,8 @@ public class PazzleController : MonoBehaviour
 {
     [SerializeField] private float moveBackDuration, moveToPointDuration, scaleDuration;
     [SerializeField] private float distanceToOrigPos;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip clipUp, clipBack, clipRight;
 
     public static event Action<float> ItemPlacedEvent;
 
@@ -39,11 +41,19 @@ public class PazzleController : MonoBehaviour
          });
     }
 
+    public void ClickSound()
+    {
+        audioSource.PlayOneShot(clipUp);
+    }
+
     public void ZoomDownHandler(float num)
     {
         transform.DOScale(_origScale * num, scaleDuration);
 
-        if (_spriteRenderer && num==1) _spriteRenderer.sortingOrder = _origOrder + 2;
+        if (_spriteRenderer && num == 1) 
+        {
+            _spriteRenderer.sortingOrder = _origOrder + 2;
+        } 
         else _spriteRenderer.sortingOrder = _origOrder + 1;
     }
 
@@ -58,6 +68,7 @@ public class PazzleController : MonoBehaviour
 
         if (distance < distanceToOrigPos)
         {
+            audioSource.PlayOneShot(clipRight);
             transform.DOKill();
             ItemPlacedEvent?.Invoke(distance);
             _clickHandler.IsHome = true;
@@ -67,6 +78,7 @@ public class PazzleController : MonoBehaviour
         }
         else
         {
+            audioSource.PlayOneShot(clipBack);
             MoveToPoint(_randomPos, 0.3f);
         }
     }

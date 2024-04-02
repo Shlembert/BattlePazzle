@@ -42,6 +42,7 @@ public class ClickHandler : MonoBehaviour
     {
         if (_isHome || !_isReady || !_isCanZoom) return;
         pazzleController.ZoomDownHandler(1f);
+        pazzleController.ClickSound();
     }
 
     private void OnMouseExit()

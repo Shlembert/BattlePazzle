@@ -11,7 +11,6 @@ public class AlbumChanger : MonoBehaviour
     [SerializeField] private AudioClip clip;
 
     private ImageDownloader _imageDownloader;
-    
     private string _buttonAlbumName;
 
     public string ButtonAlbumName { get => _buttonAlbumName; set => _buttonAlbumName = value; }

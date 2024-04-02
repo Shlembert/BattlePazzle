@@ -18,7 +18,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private float alfaPicture;
     [SerializeField] private int niceScore, goodScore, nobadScore;
     [SerializeField] private AudioSource audioSource, musicSource;
-    [SerializeField] private AudioClip clickClip, rightClick;
+    [SerializeField] private AudioClip clickClip;
     [SerializeField] private List<AudioClip> audioClipList;
 
     private Vector3 _textPos;
@@ -179,8 +179,6 @@ public class GameController : MonoBehaviour
 
     private void CheckDistance(float distance)
     {
-        audioSource.PlayOneShot(rightClick);
-
         string result;
         string bonus;
 
