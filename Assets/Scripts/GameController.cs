@@ -17,14 +17,13 @@ public class GameController : MonoBehaviour
     [SerializeField] private Image screen;
     [SerializeField] private float alfaPicture;
     [SerializeField] private int niceScore, goodScore, nobadScore;
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip niceClip, goodClip, nobadClip;
+    [SerializeField] private AudioSource audioSource, musicSource;
+    [SerializeField] private AudioClip clickClip, rightClick;
+    [SerializeField] private List<AudioClip> audioClipList;
 
     private Vector3 _textPos;
     private Color _textColor;
     private Color _bonusColor;
-
-    private AudioClip _currentClip;
 
     private int _score = 0;
     private int _count;
@@ -34,6 +33,13 @@ public class GameController : MonoBehaviour
     private float _currentTime;
 
     private List<Vector2> points = new List<Vector2>();
+
+    private void Start()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, audioClipList.Count);
+        musicSource.clip = audioClipList[randomIndex];
+        musicSource.Play();
+    }
 
     public async void StartGame()
     {
@@ -173,6 +179,8 @@ public class GameController : MonoBehaviour
 
     private void CheckDistance(float distance)
     {
+        audioSource.PlayOneShot(rightClick);
+
         string result;
         string bonus;
 
@@ -181,22 +189,18 @@ public class GameController : MonoBehaviour
             result = "Nice!";
             bonus = niceScore.ToString();
             _score += niceScore;
-            _currentClip = niceClip;
-
         }
         else if (distance < 0.5)
         {
             result = "Good!";
             bonus = goodScore.ToString();
             _score += goodScore;
-            _currentClip = goodClip;
         }
         else
         {
             result = "No bad";
             bonus = nobadScore.ToString();
             _score += nobadScore;
-            _currentClip = nobadClip;
         }
 
         scoreText.text = "Score: " + _score.ToString();
@@ -218,8 +222,6 @@ public class GameController : MonoBehaviour
         // Ћюта€ дичь каскадом, что бы добавить анимацию балла                                                   
         sequence.Append(bonusText.DOFade(0f, 0.3f).From().OnComplete(() =>
         {
-            audioSource.PlayOneShot(_currentClip);
-
             bonusText.transform.DOMoveY(15f, 1.2f).SetEase(Ease.InBack).OnComplete(() =>
             {
                 bonusText.DOFade(0f, 1f);

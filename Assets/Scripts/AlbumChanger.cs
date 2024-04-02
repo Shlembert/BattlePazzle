@@ -7,7 +7,9 @@ public class AlbumChanger : MonoBehaviour
 {
     [SerializeField] private List<Button> buttons;
     [SerializeField] private Color enableColor, disableColor;
-    
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip clip;
+
     private ImageDownloader _imageDownloader;
     
     private string _buttonAlbumName;
@@ -21,6 +23,8 @@ public class AlbumChanger : MonoBehaviour
 
     public void ActiveOtherButtons(Button pressedButton)
     {
+        audioSource.PlayOneShot(clip);
+
         foreach (var button in buttons)
         {
             button.interactable = true;

@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Plugins.Scripts.Dropbox;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -26,7 +25,6 @@ public class ImageDownloader : MonoBehaviour
     [Obsolete]
     private async void Start()
     {
-        await DropboxHelper.Initialize();
         await LoadAlbum();
 
         CreateEmptyPrefabs();

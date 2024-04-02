@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class ImageController : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
+    [SerializeField] private AudioSource _source;
+    [SerializeField] private AudioClip _clip;
+
     private ImageDownloader imageDownloader;
     private RawImage rawImage;
     private Image rotatingImage;
@@ -66,6 +69,8 @@ public class ImageController : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!isRequested) return;
+
+        _source.PlayOneShot(_clip);
 
         _offsetScrool = Input.mousePosition;
     }
